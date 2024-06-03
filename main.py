@@ -30,6 +30,7 @@ async def random_map(ctx: discord.Interaction):
 ########   Variables   ##########
 members1 = ""
 maybe1 = ""
+time1 = ""
 final = ""
 lol = 0
 xd = 0
@@ -52,7 +53,7 @@ dictionary = {
 "evie!!": "<@512091726056259584>",
 "duncanco": "<@257336528626384897>",
 "PsychedelicSuperJesus": "<@558342153001107457>",
-"Mr. Woman": "<@424678116514988053>",
+"Mateo Armendáriz De La Fuente": "<@424678116514988053>",
 "MadaMada": "<@273128060675555329>",
 "Amir El Amari": "<@189483157894987776>",
 "Social": "<@311305936742645763>"
@@ -83,6 +84,8 @@ class BlurpleButton(Button):
         super().__init__(label=label, style=discord.ButtonStyle.blurple, emoji="🔄")
     async def callback(self, interaction):
         global final
+        global time1
+
         usernames1 = final.strip().split('\n')
         #Add code here 
         random.shuffle(usernames1)  # Shuffle the list of usernames randomly
@@ -93,7 +96,7 @@ class BlurpleButton(Button):
         embed = discord.Embed(title="THE TEAMS", color = discord.Color.blurple())
         embed.add_field(name="Team 1: ", value = team1, inline=False)
         embed.add_field(name="Team 2: ", value = team2, inline=False)
-        await interaction.response.edit_message(content = "# LOCKED IN", embed = embed)
+        await interaction.response.edit_message(content = f"# LOCKED IN ({time1})", embed = embed)
 
 
 class GreenButton(Button):
@@ -105,6 +108,7 @@ class GreenButton(Button):
         global final
         global lol
         global xd
+        global time1
         if(members1.find(interaction.user.display_name) == -1):
             members1 = members1 + "\n" + interaction.user.display_name
             if (maybe1.find(interaction.user.display_name) != -1):
@@ -124,7 +128,7 @@ class GreenButton(Button):
             view.add_item(teammake)
             view.add_item(reset)
             view.timeout = None
-            await interaction.response.edit_message(content = "# LOCKED IN", embed = embed1, view = view)
+            await interaction.response.edit_message(content = f"# LOCKED IN ({time1})", embed = embed1, view = view)
             usernames = members1.strip().split('\n')
             listofnames = ""
             for username in usernames:
@@ -143,7 +147,7 @@ class GreenButton(Button):
         embed = discord.Embed(title=f"Members ({mem_count}/10)", color = discord.Color.blurple())
         embed.add_field(name="✅ Confirmed ✅: ", value = members1, inline=False)
         embed.add_field(name="❓ Maybe ❓: ", value = maybe1, inline=False)
-        await interaction.response.edit_message(content = "# Calling all Gamers", embed = embed)
+        await interaction.response.edit_message(content = f"# Calling all Gamers ({time1})", embed = embed)
 
 class GrayButton(Button):
     def __init__(self, label):
@@ -153,6 +157,7 @@ class GrayButton(Button):
         global maybe1
         global lol
         global xd
+        global time1
         if(maybe1.find(interaction.user.display_name) == -1):
             maybe1 = maybe1 + "\n" + interaction.user.display_name
             if (members1.find(interaction.user.display_name) != -1):
@@ -163,31 +168,43 @@ class GrayButton(Button):
         embed = discord.Embed(title=f"Members ({mem_count}/10)", color = discord.Color.blurple())
         embed.add_field(name="✅ Confirmed ✅: ", value = members1, inline=False)
         embed.add_field(name="❓ Maybe ❓: ", value = maybe1, inline=False)
-        await interaction.response.edit_message(content = "# Calling all Gamers", embed = embed)
+        await interaction.response.edit_message(content = f"# Calling all Gamers ({time1})", embed = embed)
 
 @bot.slash_command(name="tenq", description="Calls the legendary 10q", guild_ids=ids)
-async def tenq(ctx: discord.Interaction):
+async def tenq(ctx: discord.Interaction, time: discord.Option(str, description="Time for the 10q", required=True)): # type: ignore
+    if(lol == 10):
+        mem_count = str(lol)
+        embed1 = discord.Embed(title=f"Members ({mem_count}/10)", color = discord.Color.blurple())
+        embed1.add_field(name="List: ", value = members1, inline=False)
+        teammake = BlurpleButton("Create Teams?")
+        reset = ResetButton("New Game?")
+        view.add_item(teammake)
+        view.add_item(reset)
+        view.timeout = None
+        await ctx.respond(content = f"# LOCKED IN ({time1})", embed = embed1, view = view)
+        return
     button = GreenButton("LET ME IN")
     button1 = GrayButton("Maybe...")
     button2 = ResetButton("New Game?")
-
+    global time1
     view = View()
     view.add_item(button)
     view.add_item(button1)
     view.add_item(button2)
     view.timeout = None
-
+    time1 = time
     # @ valorant
     # await ctx.channel.send('<@&1081317738577940551>')
 
     embed = discord.Embed(title="Members (0/10)", color = discord.Color.blurple())
     embed.add_field(name="✅ Confirmed ✅: ", value = "\n", inline=False)
     embed.add_field(name="❓ Maybe ❓: ", value = "\n", inline=False)
-    await ctx.respond("# Calling all Gamers", embed = embed, view = view)
+    await ctx.respond(f"# Calling all Gamers ({time1})", embed = embed, view = view)
 
     # await ctx.respond("# Calling all Gamers", view = view)
 ###########################################################################
 
+###########################      Temporary Add member
 @bot.slash_command(name="temp_add_member", description="Temporarly add member to 10q slots (don't use if you don't know what you are doing)", guild_ids=ids)
 async def add_member(ctx: discord.Interaction, user: discord.Option(str, description="Username", required=True), at_code: discord.Option(str, description="@ code", required=True)): # type: ignore
     global dictionary
@@ -196,6 +213,60 @@ async def add_member(ctx: discord.Interaction, user: discord.Option(str, descrip
     else:
         dictionary[user] = at_code
         await ctx.respond(f"Temporary User: {user} added")
+############################################################################
+
+@bot.slash_command(name="remove_from_queue", description="Remove member from person in queue", guild_ids=ids)
+async def remove_from_queue(ctx: discord.Interaction, user: discord.Option(str, description="Username", required=True)): #type: ignore
+    global members1
+    global time1
+    usernames1 = members1.strip().split('\n')
+    if not (user in usernames1):
+        await ctx.respond("User is not in queue", ephemeral=True)
+    else:
+        members1 = members1.replace(f'\n{user}', '')
+        await ctx.respond(f'**{user}** removed from queue')
+    messages = await ctx.channel.history(limit=100).flatten()
+    gamer_message = None
+    for message in messages:
+        if message.author == bot.user and "Calling all Gamers" in message.content:
+            gamer_message = message
+            break
+
+    if gamer_message:
+        embed = discord.Embed(title=f"Members ({members1.count('\n')}/10)", color=discord.Color.blurple())
+        embed.add_field(name="✅ Confirmed ✅: ", value=members1, inline=False)
+        embed.add_field(name="❓ Maybe ❓: ", value=maybe1, inline=False)
+        await gamer_message.edit(content=f"# Calling all Gamers ({time1})", embed=embed)
+    else:
+        await ctx.channel.send("No active queue found")
+
+@bot.slash_command(name="add_to_queue", description="Add a member to the queue", guild_ids=ids)
+async def add_to_queue(ctx: discord.Interaction, user: discord.Option(str, description="Username to add", required=True)): #type: ignore
+    global members1, maybe1, time1
+    usernames1 = members1.strip().split('\n')
+    
+    # Check if the user is already in the queue
+    if user in usernames1:
+        await ctx.respond(f"**{user}** is already in the queue.", ephemeral=True)
+        return
+
+    # Add the user to the queue
+    members1 += f"\n{user}"
+    await ctx.respond(f"**{user}** added to the queue.", ephemeral=True)
+    messages = await ctx.channel.history(limit=100).flatten()
+    gamer_message = None
+    for message in messages:
+        if message.author == bot.user and "Calling all Gamers" in message.content:
+            gamer_message = message
+            break
+
+    if gamer_message:
+        embed = discord.Embed(title=f"Members ({members1.count('\n')}/10)", color=discord.Color.blurple())
+        embed.add_field(name="✅ Confirmed ✅: ", value=members1, inline=False)
+        embed.add_field(name="❓ Maybe ❓: ", value=maybe1, inline=False)
+        await gamer_message.edit(content=f"# Calling all Gamers ({time1})", embed=embed)
+    else:
+        await ctx.channel.send("No active queue found")
 
 with open('config.json', 'r') as config_file:
     config = json.load(config_file)
